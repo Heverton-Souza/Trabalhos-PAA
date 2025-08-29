@@ -1,3 +1,6 @@
+#ifndef BRKGA_H
+#define BRKGA_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -54,3 +57,5 @@ void evolve(Population *current, Population *next,
 // ----------- Utilities ----------- //
 void copy_chromosome(Chromosome *dest, Chromosome *src, int n);
 int compare_fitness(const void *a, const void *b);
+
+#endif // BRKGA_H
