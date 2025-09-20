@@ -108,7 +108,7 @@ void decode(Population *pop, Item *items, int n, int capacity){
 }
 
 int main(){
-    char filename[] = "/home/julia/Documents/Engenharia de Computação/PAA/t2_paa/texte.txt";
+    char filename[] = "teste.txt";
     Item *items;
     Population *population;
     int capacity, n; 
