@@ -6,6 +6,10 @@
 #include <time.h>
 
 // ------------------ Structures ------------------ //
+typedef struct{
+    int population_size, generations_number;
+    double mutants_percent, elite_percent;
+} BRGA_Params;
 
 // Backpack item
 typedef struct {
@@ -44,18 +48,15 @@ Population* initialize_population(int population_size, int n);
 void decode(Population *pop, Item *items, int n, int capacity);
 
 // ----------- Genetic Operators ----------- //
-void crossover(Chromosome *elite_parent, Chromosome *non_elite_parent,
-               Chromosome *child, int n, double elite_prob);
-void mutation(Chromosome *ind, int n);
+void crossover(Chromosome *child, Chromosome *elite, Chromosome *non_elite, int n);
+
+void mutation(Chromosome *mutant, int n);
 
 // ----------- Evolution ----------- //
-void evolve(Population *current, Population *next,
-            Item *items, int n, int capacity,
-            double elite_prob, double mutation_rate,
-            int num_elite, int num_mutants);
+void evolve(Population *pop, int n);
 
 // ----------- Utilities ----------- //
-void copy_chromosome(Chromosome *dest, Chromosome *src, int n);
-int compare_fitness(const void *a, const void *b);
+void sort_genes_vector(Gene *genes, int n);
+void sort_population(Population *pop);
 
 #endif // BRKGA_H
