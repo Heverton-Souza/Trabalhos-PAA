@@ -1,3 +1,5 @@
+//Integrantes: Andryck Santiago, Danilo Taveira, Frederico de Souza, Heverton Souza, Julia Baptista e Matheus Rinaldi
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -21,7 +23,7 @@ int main() {
     // Cada item: valor e peso
     for (int i = 0; i < n; i++) {
         int value = rand() % 500 + 1;   // valor entre 1 e 100
-        int weight = rand() % 100 + 1;   // peso entre 1 e 50
+        int weight = rand() % 100 + 1;  // peso entre 1 e 50
         fprintf(f, "%d %d\n", value, weight);
     }
 

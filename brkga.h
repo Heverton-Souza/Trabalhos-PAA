@@ -1,3 +1,5 @@
+//Integrantes: Andryck Santiago, Danilo Taveira, Frederico de Souza, Heverton Souza, Julia Baptista e Matheus Rinaldi
+
 #ifndef BRKGA_H
 #define BRKGA_H
 
@@ -5,7 +7,9 @@
 #include <stdlib.h>
 #include <time.h>
 
-// ------------------ Structures ------------------ //
+// ------------------ STRUCTURES ------------------ //
+#pragma region STRUCTURES
+
 typedef struct{
     int population_size, generations_number;
     double mutants_percent, elite_percent;
@@ -27,7 +31,7 @@ typedef struct {
 typedef struct {
     Gene *gen;     // vector of random keys (DNA)
     int *solution;    // decoded binary vector (phenotype)
-    int fitness;      // total value of the backpack
+    int total_value;      // total value of the backpack (fitness)
     int total_weight; // total weight of the backpack
 } Chromosome;
 
@@ -37,9 +41,14 @@ typedef struct {
     int size;
 } Population;
 
+#pragma endregion
 
-// ----------- Data input ----------- //
-Item* load_items(const char* filename, int *capacity, int *n);
+// -------------- PARÂMETROS DO BRKGA ------------- //
+#pragma region BRKGA
+int POP_SIZE = 10;     // Tamanho da população
+int STOP = 5;          // Número de gerações
+float MUTANTS_PERCENT = 0.1;  // Percentual de mutantes
+float ELITE_PERCENT = 0.3;    // Percentual de elite
 
 // ----------- Initialization ---------- //
 Population* initialize_population(int population_size, int n);
@@ -47,16 +56,39 @@ Population* initialize_population(int population_size, int n);
 // ----------- Decoding and Evaluation ----------- //
 void decode(Population *pop, Item *items, int n, int capacity);
 
-// ----------- Genetic Operators ----------- //
-void crossover(Chromosome *child, Chromosome *elite, Chromosome *non_elite, int n);
-
-void mutation(Chromosome *mutant, int n);
-
 // ----------- Evolution ----------- //
 void evolve(Population *pop, int n);
 
-// ----------- Utilities ----------- //
+// ----------- Genetic Operators ----------- //
+void mutation(Chromosome *mutant, int n);
+void crossover(Chromosome *child, Chromosome *elite, Chromosome *non_elite, int n);
+
+#pragma endregion
+
+// ----------- ORDENAÇÃO ----------- //
+#pragma region 
+
 void sort_genes_vector(Gene *genes, int n);
 void sort_population(Population *pop);
+
+#pragma endregion
+
+// --------------------- DEBUG ---------------------//
+#pragma region DEBUG
+// Imprime os valores para cada geração
+void print_individual(Chromosome ind, int id);
+
+// Imprime as melhores soluções
+void print_best_solution(Chromosome result, Item *itens, int n);
+
+#pragma endregion
+
+// ----------- Leitura dos itens ----------- //
+#pragma region LEITURA
+
+// Faz a leitura do arquivo e carrega os itens do problema da mochila
+Item* load_items(const char* filename, int *capacity, int *n);
+
+#pragma endregion
 
 #endif // BRKGA_H
