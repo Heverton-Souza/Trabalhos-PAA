@@ -45,8 +45,8 @@ typedef struct {
 
 // -------------- PARÂMETROS DO BRKGA ------------- //
 #pragma region BRKGA
-int POP_SIZE = 10;     // Tamanho da população
-int STOP = 5;          // Número de gerações
+int POP_SIZE = 100;     // Tamanho da população
+int STOP = 250;          // Número de gerações
 float MUTANTS_PERCENT = 0.1;  // Percentual de mutantes
 float ELITE_PERCENT = 0.3;    // Percentual de elite
 
@@ -68,9 +68,9 @@ void crossover(Chromosome *child, Chromosome *elite, Chromosome *non_elite, int 
 // ----------- ORDENAÇÃO ----------- //
 #pragma region 
 
-void sort_genes_vector(Gene *genes, int n);
-void sort_population(Population *pop);
-
+void sort_genes_vector(Gene *genes, int ini, int fim);
+void merge_genes(Gene *genes, int ini, int meio, int fim);
+void sort_population(Population *pop, int ini, int fim);
 #pragma endregion
 
 // --------------------- DEBUG ---------------------//

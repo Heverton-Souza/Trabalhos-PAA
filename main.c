@@ -8,30 +8,102 @@
 /*------------------------- Funções Auxiliares de Ordenação ---------------------------*/
 
 //Ordena os genes, da menor para a maior chave
-void sort_genes_vector(Gene *genes, int n){
-    Gene aux;
-    for (int i = 0; i < n; i++){
-        for (int j = 0; j < n - 1; j++){
-            if (genes[j+1].key < genes[j].key){
-                aux = genes[j+1];
-                genes[j+1] = genes[j];
-                genes[j] = aux;
-            }
-        }
-    }
+void sort_genes_vector(Gene *genes, int ini, int fim){
+
+   int meio;  
+
+   if (ini < fim) {                  
+
+      meio = (ini+fim)/2;
+
+      sort_genes_vector(genes, ini, meio);      
+      sort_genes_vector(genes, meio+1, fim);
+
+	  merge_genes(genes, ini, meio, fim); 
+
+   }
+
+}
+
+void merge_genes(Gene *genes, int ini, int meio, int fim){
+
+	Gene *temp;
+    int tamanho, inicio1, inicio2;
+
+	tamanho = fim - ini + 1;
+	inicio1 = ini;
+	inicio2 = meio + 1;
+	
+	temp = (Gene *) malloc(tamanho*sizeof(Gene));
+
+	for(int i = 0; i < tamanho; i++){
+
+	    if((inicio1 <= meio) && (inicio2 <= fim)){
+
+			if(genes[inicio1].key < genes[inicio2].key)
+				temp[i] = genes[inicio1++];
+			else
+				temp[i] = genes[inicio2++];
+
+	    }
+		else{
+			
+			if(inicio1 <= meio)
+				temp[i] = genes[inicio1++];
+			else
+				temp[i] = genes[inicio2++];
+
+		}
+	}
+
+	for(int i = 0, j = ini; i < tamanho; i++, j++)
+		genes[j] = temp[i];
+	
+
+	free(temp);
 }
 
 //Ordena a população de acordo com os maiores fitness value
-void sort_population(Population *pop){
-    Chromosome aux;
-    for (int i = 0; i < pop->size; i++){
-        for (int j = 0; j < pop->size - 1; j++){
-            if (pop->individuals[j+1].total_value > pop->individuals[j].total_value){
-                aux = pop->individuals[j+1];
-                pop->individuals[j+1] = pop->individuals[j];
-                pop->individuals[j] = aux;
+void merge_population(Population *pop, int ini, int meio, int fim){
+    int tamanho = fim - ini + 1;
+    int i1 = ini;
+    int i2 = meio + 1;
+
+    Chromosome *temp = (Chromosome *) malloc(tamanho * sizeof(Chromosome));
+    if (!temp) {
+        fprintf(stderr, "Erro: malloc falhou em merge_population\n");
+        exit(1);
+    }
+
+    for (int k = 0; k < tamanho; k++){
+        if ((i1 <= meio) && (i2 <= fim)) {
+            // queremos ordenar do maior para o menor (melhor fitness primeiro)
+            if (pop->individuals[i1].total_value >= pop->individuals[i2].total_value) {
+                temp[k] = pop->individuals[i1++];
+            } else {
+                temp[k] = pop->individuals[i2++];
             }
+        } else {
+            if (i1 <= meio)
+                temp[k] = pop->individuals[i1++];
+            else
+                temp[k] = pop->individuals[i2++];
         }
+    }
+
+    for (int k = 0, j = ini; k < tamanho; k++, j++){
+        pop->individuals[j] = temp[k];
+    }
+
+    free(temp);
+}
+
+void sort_population(Population *pop, int ini, int fim){
+    if (ini < fim) {
+        int meio = (ini + fim) / 2;
+        sort_population(pop, ini, meio);
+        sort_population(pop, meio + 1, fim);
+        merge_population(pop, ini, meio, fim);
     }
 }
 
@@ -66,7 +138,7 @@ void decode(Population *pop, Item *items, int n, int capacity){
         pop->individuals[i].total_weight = 0;
 
         // Ordena genes (chaves) -> define prioridade dos itens
-        sort_genes_vector(pop->individuals[i].gen, n);
+        sort_genes_vector(pop->individuals[i].gen, 0, n-1);
 
         // Constrói solução
         for(int j = 0; j < n; j++){
@@ -91,15 +163,26 @@ void evolve(Population *pop, int n){
 
     // 1. Copia elite direto
     for(int i = 0; i < elite_size; i++){
-        new_pop->individuals[i] = pop->individuals[i];
+        // Aloca espaço para gen e solution antes de copiar
+        new_pop->individuals[i].gen = (Gene*)malloc(n * sizeof(Gene));
+        new_pop->individuals[i].solution = (int*)malloc(n * sizeof(int));
+
+        new_pop->individuals[i].total_value = pop->individuals[i].total_value;
+        new_pop->individuals[i].total_weight = pop->individuals[i].total_weight;
+
+        for (int j = 0; j < n; j++) {
+            new_pop->individuals[i].gen[j] = pop->individuals[i].gen[j];
+            new_pop->individuals[i].solution[j] = pop->individuals[i].solution[j];
+        }
     }
 
     // 2. Gera mutantes
     for(int i = elite_size; i < elite_size + mutants; i++){
-        new_pop->individuals[i].total_value = 0;
-        new_pop->individuals[i].total_weight = 0;
         new_pop->individuals[i].gen = (Gene*)malloc(n * sizeof(Gene));
         new_pop->individuals[i].solution = (int*)malloc(n * sizeof(int));
+
+        new_pop->individuals[i].total_value = 0;
+        new_pop->individuals[i].total_weight = 0;
         mutation(&new_pop->individuals[i], n);
     }
 
@@ -108,16 +191,23 @@ void evolve(Population *pop, int n){
         int elite_parent = rand() % elite_size;
         int non_elite_parent = elite_size + rand() % (pop->size - elite_size);
 
-        new_pop->individuals[i].total_value = 0;
-        new_pop->individuals[i].total_weight = 0;
         new_pop->individuals[i].gen = (Gene*)malloc(n * sizeof(Gene));
         new_pop->individuals[i].solution = (int*)malloc(n * sizeof(int));
+
+        new_pop->individuals[i].total_value = 0;
+        new_pop->individuals[i].total_weight = 0;
 
         crossover(&new_pop->individuals[i], &pop->individuals[elite_parent], &pop->individuals[non_elite_parent], n);
     }
 
-    // Substitui população antiga
+    // Libera memória da população antiga
+    for (int i = 0; i < pop->size; i++) {
+        free(pop->individuals[i].gen);
+        free(pop->individuals[i].solution);
+    }
     free(pop->individuals);
+
+    // Substitui população antiga pela nova
     pop->individuals = new_pop->individuals;
     free(new_pop);
 }
@@ -191,7 +281,7 @@ Item* load_items(const char* filename, int *capacity, int *n){
 /*------------------------- Main ---------------------------*/
 int main(){
     srand(time(NULL));
-    char filename[] = "D:/Trabalhos-PAA/output/teste.txt"; // coloque seu arquivo
+    char filename[] = "C:\\Users\\Szafr\\OneDrive\\Documentos\\GitHub\\Trabalhos-PAA\\teste.txt"; // coloque seu arquivo
     Item *items;
     Population *population;
     int capacity, n; 
@@ -212,7 +302,7 @@ int main(){
         decode(population, items, n, capacity);
 
         // Ordena população
-        sort_population(population);
+        sort_population(population, 0, population->size -1);
 
         // Mostra população
         for (int i = 0; i < population->size; i++){
