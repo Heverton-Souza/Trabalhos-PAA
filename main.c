@@ -169,7 +169,12 @@ void evolve(Population *pop, int n){
 
     // 1. Copia elite direto
     for(int i = 0; i < elite_size; i++){
-        new_pop.individuals[i] = pop->individuals[i];
+        new_pop.individuals[i].gen = (Gene*)malloc(n * sizeof(Gene));
+        new_pop.individuals[i].solution = (int*)malloc(n * sizeof(int));
+        memcpy(new_pop.individuals[i].gen, pop->individuals[i].gen, n * sizeof(Gene));
+        memcpy(new_pop.individuals[i].solution, pop->individuals[i].solution, n * sizeof(int));
+        new_pop.individuals[i].total_value = pop->individuals[i].total_value;
+        new_pop.individuals[i].total_weight = pop->individuals[i].total_weight;
     }
 
     // 2. Gera mutantes
@@ -191,9 +196,17 @@ void evolve(Population *pop, int n){
     }
 
     // Substitui população antiga
-    free(pop->individuals);
+    free_population(pop, n);
     pop->individuals = new_pop.individuals;
     
+}
+
+void free_population(Population *pop, int n){
+    for (int i = 0; i < pop->size; i++){
+        free(pop->individuals[i].gen);
+        free(pop->individuals[i].solution);
+    }
+    free(pop->individuals);
 }
 
 // Gera um mutante completamente novo para aumentar a variedade da população
@@ -269,7 +282,7 @@ Item* load_items(const char* filename, int *capacity, int *n){
 /*------------------------- Main ---------------------------*/
 int main(){
     srand(time(NULL));
-    char filename[] = "/home/julia/Documents/Engenharia de Computação/PAA/t2_paa/teste.txt"; // coloque seu arquivo
+    char filename[] = "C:\\Users\\Oca\\Downloads\\Trabalhos-PAA\\output\\teste.txt"; // coloque seu arquivo
     Item *items;
     Population *population;
     int capacity, n; 
