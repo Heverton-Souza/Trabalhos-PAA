@@ -36,8 +36,8 @@ typedef struct {
 } Chromosome;
 
 // Population (set of chromosomes)
-typedef struct {
-    Chromosome *individuals;
+typedef struct { 
+    Chromosome *individuals; //Uma solução (Conjunto de ítens da mochila)
     int size;
 } Population;
 
@@ -48,7 +48,7 @@ typedef struct {
 int POP_SIZE = 100;     // Tamanho da população
 int STOP = 250;          // Número de gerações
 float MUTANTS_PERCENT = 0.1;  // Percentual de mutantes
-float ELITE_PERCENT = 0.3;    // Percentual de elite
+float ELITE_PERCENT = 0.2;    // Percentual de elite
 
 // ----------- Initialization ---------- //
 Population* initialize_population(int population_size, int n);
@@ -57,8 +57,8 @@ Population* initialize_population(int population_size, int n);
 void decode(Population *pop, Item *items, int n, int capacity);
 
 // ----------- Evolution ----------- //
-void evolve(Population *pop, int n);
-
+//void evolve(Population *pop, int n);
+void evolve(Population *pop, Population *new_pop, int n);
 // ----------- Genetic Operators ----------- //
 void mutation(Chromosome *mutant, int n);
 void crossover(Chromosome *child, Chromosome *elite, Chromosome *non_elite, int n);
