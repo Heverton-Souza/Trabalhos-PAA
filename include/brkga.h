@@ -16,29 +16,29 @@ typedef struct{
     double mutants_percent, elite_percent;
 } BRGA_Params;
 
-// Backpack item
+// Item na mochila
 typedef struct {
     int value;
     int weight;
 } Item;
 
-// Auxiliary gene for decoding (key sorting)
+// Gene auxiliar para decodificação (ordenação de chave)
 typedef struct {
-    int index;      // index of the original item
-    double key;     // value of the random key
+    int index;      // index do item original
+    double key;     // valor da chave aleatória
 } Gene;
 
-// Chromosome (Individual of the population)
+// Cromossomo (Indivíduo de uma população)
 typedef struct {
-    Gene *gen;     // vector of random keys (DNA)
-    int *solution;    // decoded binary vector (phenotype)
-    int total_value;      // total value of the backpack (fitness)
-    int total_weight; // total weight of the backpack
+    Gene *gen;        // vetor de chaves aleatórias (DNA)
+    int *solution;    // vetor de binario decodificado (fenótipo)
+    int total_value;  // valor total da mochila (fitness)
+    int total_weight; // peso total da mochila
 } Chromosome;
 
-// Population (set of chromosomes)
+// População (Conjunto de cromossomos)
 typedef struct { 
-    Chromosome *individuals; //Uma solução (Conjunto de ítens da mochila)
+    Chromosome *individuals; // Uma solução (Conjunto de ítens da mochila)
     int size;
 } Population;
 
@@ -47,24 +47,24 @@ typedef struct {
 // -------------- BRKGA ------------- //
 #pragma region BRKGA
 extern int POP_SIZE;           // Tamanho da população
-extern int STOP;               // Número de gerações
+extern int STOP_BY_GEN;        // Número de gerações
+extern int STOP_BY_ELITE;      // Parâmetro de vício das gerações
 extern float MUTANTS_PERCENT;  // Percentual de mutantes
 extern float ELITE_PERCENT;    // Percentual de elite
 
-// ----------- Initialization ---------- //
-Population* initialize_population(int population_size, int n);
+// ----------- Inicialização ---------- //
+Population* initialize_population(int population_size, int num_items);
 
-// ----------- Decoding and Evaluation ----------- //
-void decode(Population *pop, Item *items, int n, int capacity);
+// ----------- Decodificação e avaliação ----------- //
+void decode(Population *pop, Item *items, int num_items, int capacity);
 
-// ----------- Evolution ----------- //
-//void evolve(Population *pop, int n);
-void evolve(Population *pop, int n);
+// ----------- Avaliação ----------- //
+void evolve(Population *pop, int num_items);
 void free_population(Population *pop);
 
-// ----------- Genetic Operators ----------- //
-void mutation(Chromosome *mutant, int n);
-void crossover(Chromosome *child, Chromosome *elite, Chromosome *non_elite, int n);
+// ----------- Operadores genéticos ----------- //
+void mutation(Chromosome *mutant, int num_items);
+void crossover(Chromosome *child, Chromosome *elite, Chromosome *non_elite, int num_items);
 
 #pragma endregion
 
@@ -80,10 +80,10 @@ void sort_population(Population *pop, int ini, int fim);
 // --------------------- DEBUG ---------------------//
 #pragma region DEBUG
 // Imprime os valores para cada geração
-void print_individual(Chromosome ind, int id);
+void print_individual(Chromosome ind, int gen);
 
 // Imprime as melhores soluções
-void print_best_solution(Chromosome result, Item *itens, int n);
+void print_best_solution(Chromosome result, Item *itens, int num_items);
 
 #pragma endregion
 
@@ -91,7 +91,7 @@ void print_best_solution(Chromosome result, Item *itens, int n);
 #pragma region LEITURA
 
 // Faz a leitura do arquivo e carrega os itens do problema da mochila
-Item* load_items(const char* filename, int *capacity, int *n);
+Item* load_items(const char* filename, int *capacity, int *num_items);
 
 #pragma endregion
 

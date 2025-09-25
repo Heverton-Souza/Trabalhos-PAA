@@ -5,8 +5,11 @@
 /*------------------------- DEBUG ---------------------------*/
 
 // Imprime os valores para cada geração
-void print_individual(Chromosome ind, int id){
-    printf(" Individuo (solucao) %d | Valor Total: %d | Peso Total: %d\n", id, ind.total_value, ind.total_weight);
+void print_individual(Chromosome ind, int gen){
+    printf("============================\n");
+    printf(" Geracao %d\n", gen+1);
+    printf("============================\n");
+    printf(" Individuo (solucao) 1 | Valor Total: %d | Peso Total: %d\n",ind.total_value, ind.total_weight);
 }
 
 // Imprime o resultado final
