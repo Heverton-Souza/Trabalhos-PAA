@@ -117,13 +117,11 @@ Population* initialize_population(int population_size, int n){
     population->individuals = (Chromosome*)malloc(population_size * sizeof(Chromosome));
 
     for (int i = 0; i < population_size; i++){
-        population->individuals[i].total_value = 0;
-        population->individuals[i].total_weight = 0;
         population->individuals[i].gen = (Gene*)malloc(n * sizeof(Gene));
         population->individuals[i].solution = (int*)malloc(n * sizeof(int));
 
         for (int j = 0; j < n; j++){
-            population->individuals[i].gen[j].key = rand()%1000/1000.0;
+            population->individuals[i].gen[j].key = rand()%RAND_MAX;
             population->individuals[i].gen[j].index = j;
             population->individuals[i].solution[j] = 0;
         }
@@ -136,7 +134,9 @@ void decode(Population *pop, Item *items, int n, int capacity){
     for (int i = 0; i < pop->size; i++){
         pop->individuals[i].total_value = 0;
         pop->individuals[i].total_weight = 0;
-
+        
+        Gene *temp = (Gene*)malloc(n * sizeof(Gene));
+        memcpy(temp, pop->individuals[i].gen, n * sizeof(Gene));
         // Ordena genes (chaves) -> define prioridade dos itens
         sort_genes_vector(pop->individuals[i].gen, 0, n-1);
 
@@ -148,41 +148,31 @@ void decode(Population *pop, Item *items, int n, int capacity){
                 pop->individuals[i].total_value += items[idx].value;
                 pop->individuals[i].solution[idx] = 1;
             }
+            else{
+                break;
+            }
         }
+        // Restaura os genes originais (se precisar)
+        memcpy(pop->individuals[i].gen, temp, n * sizeof(Gene));
+        // Libera memória
+        free(temp);
     }
 }
 
-// Atualiza população (elitismo + mutantes + descendentes)
-void evolve(Population *pop, int n){
+void evolve(Population *pop, Population *new_pop, int n){
     int elite_size = pop->size * ELITE_PERCENT; // número de elite
     int mutants = pop->size * MUTANTS_PERCENT;  // número de mutantes
 
-    Population *new_pop = (Population*)malloc(sizeof(Population));
-    new_pop->size = pop->size;
-    new_pop->individuals = (Chromosome*)malloc(pop->size * sizeof(Chromosome));
 
     // 1. Copia elite direto
     for(int i = 0; i < elite_size; i++){
-        // Aloca espaço para gen e solution antes de copiar
-        new_pop->individuals[i].gen = (Gene*)malloc(n * sizeof(Gene));
-        new_pop->individuals[i].solution = (int*)malloc(n * sizeof(int));
-
-        new_pop->individuals[i].total_value = pop->individuals[i].total_value;
-        new_pop->individuals[i].total_weight = pop->individuals[i].total_weight;
-
-        for (int j = 0; j < n; j++) {
-            new_pop->individuals[i].gen[j] = pop->individuals[i].gen[j];
-            new_pop->individuals[i].solution[j] = pop->individuals[i].solution[j];
-        }
+        new_pop->individuals[i] = pop->individuals[i];
     }
 
     // 2. Gera mutantes
     for(int i = elite_size; i < elite_size + mutants; i++){
         new_pop->individuals[i].gen = (Gene*)malloc(n * sizeof(Gene));
         new_pop->individuals[i].solution = (int*)malloc(n * sizeof(int));
-
-        new_pop->individuals[i].total_value = 0;
-        new_pop->individuals[i].total_weight = 0;
         mutation(&new_pop->individuals[i], n);
     }
 
@@ -194,41 +184,32 @@ void evolve(Population *pop, int n){
         new_pop->individuals[i].gen = (Gene*)malloc(n * sizeof(Gene));
         new_pop->individuals[i].solution = (int*)malloc(n * sizeof(int));
 
-        new_pop->individuals[i].total_value = 0;
-        new_pop->individuals[i].total_weight = 0;
-
         crossover(&new_pop->individuals[i], &pop->individuals[elite_parent], &pop->individuals[non_elite_parent], n);
     }
 
-    // Libera memória da população antiga
-    for (int i = 0; i < pop->size; i++) {
-        free(pop->individuals[i].gen);
-        free(pop->individuals[i].solution);
-    }
-    free(pop->individuals);
-
-    // Substitui população antiga pela nova
-    pop->individuals = new_pop->individuals;
-    free(new_pop);
 }
 
 // Gera um mutante completamente novo para aumentar a variedade da população
 void mutation(Chromosome *mutant, int n){
     for (int i = 0; i < n; i++){
-        mutant->gen[i].key = rand()%1000/1000.0; //Gera uma chave aleatória de 0.000 a 0.999
+        mutant->gen[i].key = rand()%RAND_MAX; //Gera uma chave aleatória de 0.000 a 0.999
         mutant->gen[i].index = i; //Armazena a qual ítem essa chave se refere
     }
 }
+
 
 //Faz o crossover entre os membros Elite e Não Elite
 void crossover(Chromosome *child, Chromosome *elite, Chromosome *non_elite, int n){
     for (int i = 0; i < n; i++){
         int p = rand() % 10 + 1;
-        if (p > 3){ // 70% chance vem do elite
+
+        if (p > 3){ // 60% chance vem do elite
             child->gen[i].key = elite->gen[i].key;
-        } else {    // 30% chance vem do não-elite
-            child->gen[i].key = non_elite->gen[i].key;
+        } else {    // 40% chance vem do não-elite
+            child->gen[i].key = non_elite->gen[i].key;;
         }
+
+        child->solution[i] = 0;
         child->gen[i].index = i;
     }
 }
@@ -237,7 +218,7 @@ void crossover(Chromosome *child, Chromosome *elite, Chromosome *non_elite, int 
 
 // Imprime os valores para cada geração
 void print_individual(Chromosome ind, int id){
-    printf(" \nIndividuo (solucao) %d | Valor Total: %d | Peso Total: %d\n", id, ind.total_value, ind.total_weight);
+    printf(" Individuo (solucao) %d | Valor Total: %d | Peso Total: %d\n", id, ind.total_value, ind.total_weight);
 }
 
 void print_best_solution(Chromosome result, Item *itens, int n){
@@ -281,22 +262,20 @@ Item* load_items(const char* filename, int *capacity, int *n){
 /*------------------------- Main ---------------------------*/
 int main(){
     srand(time(NULL));
-    char filename[] = "C:\\Users\\Szafr\\OneDrive\\Documentos\\GitHub\\Trabalhos-PAA\\teste.txt"; // coloque seu arquivo
+    char filename[] = "/home/julia/Documents/Engenharia de Computação/PAA/t2_paa/teste.txt"; // coloque seu arquivo
     Item *items;
-    Population *population;
+    Population *population, *aux_poplation;
     int capacity, n; 
-    
+    int previous_elite = 0;
+    int cont = 0, gen=0;
     // Carrega itens
     items = load_items(filename, &capacity, &n);
 
     // Inicializa população
     population = initialize_population(POP_SIZE, n);
-
+    aux_poplation = population;
     // Loop de gerações
-    for (int gen = 0; gen < STOP; gen++){
-        printf("\n============================\n");
-        printf(" Geracao %d\n", gen+1);
-        printf("============================\n");
+    while(cont < 100){
 
         // Decodifica
         decode(population, items, n, capacity);
@@ -304,15 +283,20 @@ int main(){
         // Ordena população
         sort_population(population, 0, population->size -1);
 
-        // Mostra população
-        for (int i = 0; i < population->size; i++){
-            print_individual(population->individuals[i], i+1);
+        if (previous_elite != population->individuals[0].total_value){
+            printf("============================\n");
+            printf(" Geracao %d\n", gen+1);
+            printf("============================\n");
+            print_individual(population->individuals[0], 1);
+            previous_elite = population->individuals[0].total_value;
+            cont=0;
         }
 
-        // Atualiza população
-        if (gen < STOP - 1){
-            evolve(population, n);
-        }
+        evolve(population, aux_poplation, n);  
+        population = aux_poplation;
+        gen++;
+        cont++;
+
     }
 
     print_best_solution(population->individuals[0], items, n);
