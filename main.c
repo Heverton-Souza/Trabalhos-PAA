@@ -159,21 +159,24 @@ void decode(Population *pop, Item *items, int n, int capacity){
     }
 }
 
-void evolve(Population *pop, Population *new_pop, int n){
+void evolve(Population *pop, int n){
     int elite_size = pop->size * ELITE_PERCENT; // número de elite
     int mutants = pop->size * MUTANTS_PERCENT;  // número de mutantes
 
+    Population new_pop;
+    new_pop.size = pop->size;
+    new_pop.individuals = (Chromosome*)malloc(pop->size * sizeof(Chromosome));
 
     // 1. Copia elite direto
     for(int i = 0; i < elite_size; i++){
-        new_pop->individuals[i] = pop->individuals[i];
+        new_pop.individuals[i] = pop->individuals[i];
     }
 
     // 2. Gera mutantes
     for(int i = elite_size; i < elite_size + mutants; i++){
-        new_pop->individuals[i].gen = (Gene*)malloc(n * sizeof(Gene));
-        new_pop->individuals[i].solution = (int*)malloc(n * sizeof(int));
-        mutation(&new_pop->individuals[i], n);
+        new_pop.individuals[i].gen = (Gene*)malloc(n * sizeof(Gene));
+        new_pop.individuals[i].solution = (int*)malloc(n * sizeof(int));
+        mutation(&new_pop.individuals[i], n);
     }
 
     // 3. Gera descendentes (crossover)
@@ -181,12 +184,16 @@ void evolve(Population *pop, Population *new_pop, int n){
         int elite_parent = rand() % elite_size;
         int non_elite_parent = elite_size + rand() % (pop->size - elite_size);
 
-        new_pop->individuals[i].gen = (Gene*)malloc(n * sizeof(Gene));
-        new_pop->individuals[i].solution = (int*)malloc(n * sizeof(int));
+        new_pop.individuals[i].gen = (Gene*)malloc(n * sizeof(Gene));
+        new_pop.individuals[i].solution = (int*)malloc(n * sizeof(int));
 
-        crossover(&new_pop->individuals[i], &pop->individuals[elite_parent], &pop->individuals[non_elite_parent], n);
+        crossover(&new_pop.individuals[i], &pop->individuals[elite_parent], &pop->individuals[non_elite_parent], n);
     }
 
+    // Substitui população antiga
+    free(pop->individuals);
+    pop->individuals = new_pop.individuals;
+    
 }
 
 // Gera um mutante completamente novo para aumentar a variedade da população
@@ -264,7 +271,7 @@ int main(){
     srand(time(NULL));
     char filename[] = "/home/julia/Documents/Engenharia de Computação/PAA/t2_paa/teste.txt"; // coloque seu arquivo
     Item *items;
-    Population *population, *aux_poplation;
+    Population *population;
     int capacity, n; 
     int previous_elite = 0;
     int cont = 0, gen=0;
@@ -273,7 +280,7 @@ int main(){
 
     // Inicializa população
     population = initialize_population(POP_SIZE, n);
-    aux_poplation = population;
+
     // Loop de gerações
     while(cont < 100){
 
@@ -282,7 +289,6 @@ int main(){
 
         // Ordena população
         sort_population(population, 0, population->size -1);
-
         if (previous_elite != population->individuals[0].total_value){
             printf("============================\n");
             printf(" Geracao %d\n", gen+1);
@@ -292,8 +298,7 @@ int main(){
             cont=0;
         }
 
-        evolve(population, aux_poplation, n);  
-        population = aux_poplation;
+        evolve(population, n);  
         gen++;
         cont++;
 

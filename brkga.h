@@ -58,7 +58,7 @@ void decode(Population *pop, Item *items, int n, int capacity);
 
 // ----------- Evolution ----------- //
 //void evolve(Population *pop, int n);
-void evolve(Population *pop, Population *new_pop, int n);
+void evolve(Population *pop, int n);
 // ----------- Genetic Operators ----------- //
 void mutation(Chromosome *mutant, int n);
 void crossover(Chromosome *child, Chromosome *elite, Chromosome *non_elite, int n);
