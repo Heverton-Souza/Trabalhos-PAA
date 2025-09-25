@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 // ------------------ STRUCTURES ------------------ //
@@ -43,12 +44,12 @@ typedef struct {
 
 #pragma endregion
 
-// -------------- PARÂMETROS DO BRKGA ------------- //
+// -------------- BRKGA ------------- //
 #pragma region BRKGA
-int POP_SIZE = 100;     // Tamanho da população
-int STOP = 250;          // Número de gerações
-float MUTANTS_PERCENT = 0.1;  // Percentual de mutantes
-float ELITE_PERCENT = 0.2;    // Percentual de elite
+extern int POP_SIZE;           // Tamanho da população
+extern int STOP;               // Número de gerações
+extern float MUTANTS_PERCENT;  // Percentual de mutantes
+extern float ELITE_PERCENT;    // Percentual de elite
 
 // ----------- Initialization ---------- //
 Population* initialize_population(int population_size, int n);
@@ -59,7 +60,7 @@ void decode(Population *pop, Item *items, int n, int capacity);
 // ----------- Evolution ----------- //
 //void evolve(Population *pop, int n);
 void evolve(Population *pop, int n);
-void free_population(Population *pop, int n);
+void free_population(Population *pop);
 
 // ----------- Genetic Operators ----------- //
 void mutation(Chromosome *mutant, int n);
@@ -73,6 +74,7 @@ void crossover(Chromosome *child, Chromosome *elite, Chromosome *non_elite, int 
 void sort_genes_vector(Gene *genes, int ini, int fim);
 void merge_genes(Gene *genes, int ini, int meio, int fim);
 void sort_population(Population *pop, int ini, int fim);
+
 #pragma endregion
 
 // --------------------- DEBUG ---------------------//

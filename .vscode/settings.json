@@ -1,5 +1,8 @@
 {
   "files.associations": {
-    "stdio.h": "c"
+    "*.py": "python",
+    "stdio.h": "c",
+    "brkga.h": "c",
+    "stdlib.h": "c"
   }
 }
