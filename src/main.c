@@ -6,14 +6,14 @@
 #include "brkga.h"
 
 // Coloque o caminho para o seu arquivo aqui
-char path_to_backpack[] = "C:\\Users\\Oca\\Downloads\\Trabalhos-PAA\\output\\teste.txt";
+char path_to_backpack[] = "C:\\Users\\Oca\\Downloads\\Trabalhos-PAA\\output\\backpack.txt";
 
 /*------------------------- Parâmetros do BRKGA ---------------------------*/
 int POP_SIZE = 100;           // Tamanho da população
 int STOP_BY_GEN = 250;        // Número de gerações
 int STOP_BY_ELITE = 100;      // Parâmetro de vício das gerações
 float MUTANTS_PERCENT = 0.1;  // Percentual de mutantes
-float ELITE_PERCENT = 0.2;    // Percentual de elite
+float ELITE_PERCENT = 0.3;    // Percentual de elite
 
 /*-------------------- Leitura dos itens --------------------*/
 // Faz a leitura do arquivo e carrega os itens do problema da mochila

@@ -110,9 +110,9 @@ void crossover(Chromosome *child, Chromosome *elite, Chromosome *non_elite, int 
     for (int i = 0; i < num_items; i++){
         int p = rand() % 10 + 1;
 
-        if (p > 3){ // 60% chance vem do elite
+        if (p > 3){ // 70% chance vem do elite
             child->gen[i].key = elite->gen[i].key;
-        } else {    // 40% chance vem do não-elite
+        } else {    // 30% chance vem do não-elite
             child->gen[i].key = non_elite->gen[i].key;;
         }
 

@@ -6,8 +6,8 @@
 
 int main() {
     int n = 10000;          // número de itens
-    int capacity = 5000;   // capacidade da mochila
-    FILE *f = fopen("teste.txt", "w");
+    int capacity = 5000;    // capacidade da mochila
+    FILE *f = fopen("backpack.txt", "w");
     if (!f) {
         printf("Erro ao criar arquivo!\n");
         return 1;
